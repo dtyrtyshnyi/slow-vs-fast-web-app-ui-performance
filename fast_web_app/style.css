@@ -1,0 +1,123 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Цей клас створює сітку з 3-х колонок */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Цей клас стилізує саму картку товару */
+.product-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    /* ФІКС: додаємо overflow: hidden, щоб кути зображення були заокруглені */
+    overflow: hidden;
+}
+
+/* Стиль для помилки завантаження зображення (з script.js) */
+.image-error-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #f0f0f0;
+    color: #999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+/* Стиль для помилки завантаження API */
+.error {
+    grid-column: 1 / -1; /* На всю ширину сітки */
+    color: red;
+    text-align: center;
+    padding: 2rem;
+}
+
+
+/* ФІКС 3 (CLS): Додаємо стилі для плейсхолдера банера.
+  Головне - min-height, що дорівнює висоті реального банера.
+*/
+.banner-placeholder {
+    min-height: 52px; /* (15px padding * 2) + (2px border * 2) + (приблизна висота шрифту) */
+    background: #f0f0f0; /* Ледь помітний фон, щоб показати, що місце зарезервовано */
+}
+
+.dynamic-banner {
+    background: #ffc;
+    border: 2px solid #e6db55;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* ФІКС 1 (CLS): Виправляємо стрибки при завантаженні зображень.
+  Ми додаємо 'aspect-ratio', щоб браузер зарезервував
+  місце правильної пропорції (напр., 4:3) ДО завантаження картинки.
+  'object-fit: cover' гарантує, що зображення заповнить блок
+  без спотворення пропорцій.
+*/
+.product-card img {
+    width: 100%;
+    height: auto; 
+    aspect-ratio: 4 / 3; /* 👈 ВАЖЛИВИЙ ФІКС */
+    object-fit: cover;   /* 👈 ВАЖЛИВИЙ ФІКС */
+    background: #eee;    /* Фон, поки зображення вантажиться */
+}
+
+/* ФІКС 4 (CLS): Стилі для "скелетонів"
+*/
+.skeleton-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px;
+    background: #fff;
+}
+
+.skeleton-img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: #f0f0f0;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-text {
+    height: 20px;
+    background: #f0f0f0;
+    margin-top: 10px;
+    border-radius: 4px;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+.skeleton-text.short {
+    width: 60%;
+}
+
+@keyframes pulse {
+    0% { background-color: #f0f0f0; }
+    50% { background-color: #e0e0e0; }
+    100% { background-color: #f0f0f0; }
+}
