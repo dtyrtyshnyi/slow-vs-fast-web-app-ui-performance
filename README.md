@@ -72,12 +72,12 @@ cd slow-vs-fast-web-app-ui-performance
 # Install 'bad' API dependencies
 cd slow_web_app
 npm install
-cd ../..
+cd ..
 
 # Install 'good' API dependencies
 cd fast_web_app
 npm install
-cd ../..
+cd ..
 ```
 
 -----
