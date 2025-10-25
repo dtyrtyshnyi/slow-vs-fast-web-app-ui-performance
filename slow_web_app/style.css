@@ -1,0 +1,67 @@
+/* Уявіть, що цей файл дуже великий, немініфікований */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    padding: 1rem;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.product img {
+    width: 100%; /* Стискаємо велике зображення, але браузер все одно завантажує 5MB */
+    height: auto;
+    border: 1px solid #ccc;
+}
+
+/* ПРОБЛЕМА 4 (Частина 3): Стилі для банера, який буде додано динамічно
+*/
+.dynamic-banner {
+    background: #ffc;
+    border: 2px solid #e6db55;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* ... (додайте базові стилі з минулого прикладу) ... */
+
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.product-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+}
+
+.product-card img {
+    /* ПРОБЛЕМА UI 1: Зображення завантажуються у повну величину, 
+      але відображаються маленькими.
+    */
+    width: 100%;
+    height: auto; 
+    /* ПРОБЛЕМА UI 4: Немає aspect-ratio або min-height, буде CLS */
+}
+
+.loader {
+    font-size: 1.5em;
+    text-align: center;
+    grid-column: 1 / -1; /* на всю ширину */
+}
