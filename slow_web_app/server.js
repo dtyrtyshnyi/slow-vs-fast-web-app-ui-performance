@@ -1,9 +1,15 @@
 const express = require('express');
-const cors = require('cors'); // Для дозволу запитів з S3
+const cors = require('cors'); // Для дозволу запитів з CDN/S3
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
+
+// Конфіг для переключення локальних та CDN-URL зображень.
+// Керувати через змінні оточення:
+//   USE_CDN=true CDN_BASE_URL=https://d361b03n3b4xcx.cloudfront.net node server.js
+const USE_CDN = (process.env.USE_CDN === 'true'); // default: false
+const CDN_BASE_URL = (process.env.CDN_BASE_URL || '').replace(/\/$/, ''); // без кінцевого '/'
 
 // Функція, що імітує блокуючу, "важку" операцію
 // Це наш головний серверний BOTTLENECK.
@@ -13,6 +19,22 @@ function blockMainThread(duration) {
         // Синхронна "робота", що блокує ВЕСЬ event loop
     }
     console.log(`Thread was blocked for ${duration}ms`);
+}
+
+// Допоміжна функція для формування фінального imageUrl
+function resolveImageUrl(product) {
+    // Якщо увімкнено CDN і в товарі є явно вказане cdnImageUrl — використовуємо його
+    if (USE_CDN && product.cdnImageUrl) {
+        return product.cdnImageUrl;
+    }
+
+    // Якщо увімкнено CDN та заданий CDN_BASE_URL — будуємо URL на основі локального шляху
+    if (USE_CDN && CDN_BASE_URL) {
+        return `${CDN_BASE_URL}/${product.imageUrl.replace(/^\/+/, '')}`;
+    }
+
+    // Інакше повертаємо локальний шлях (як було раніше)
+    return product.imageUrl;
 }
 
 // "База даних" наших товарів
@@ -27,9 +49,7 @@ const productsData = [
         id: 2,
         name: "Величезний Неоптимізований Macbook",
         description: "Цей Macbook настільки великий, що його фото важить 2.2MB.",
-        // ПРОБЛЕМА UI 1: Посилання на величезне зображення
         imageUrl: "img/1_mac.png"
-        //imageUrl: "https'://your-s3-bucket-url/high-res-product-1.jpg" 
     },
     {
         id: 3,
@@ -77,21 +97,24 @@ const productsData = [
 
 // Ендпоінт, який буде "гальмувати"
 app.get('/api/products', (req, res) => {
-    console.log(`Request received for /api/products...`);
+    console.log(`Request received for /api/products... USE_CDN=${USE_CDN} CDN_BASE_URL=${CDN_BASE_URL || '<none>'}`);
     
     // Імітуємо повільний запит до БД або складну бізнес-логіку
-    // Встановіть значення, яке буде помітним (напр., 100-300ms)
-    // Під навантаженням JMeter ці 100ms перетворяться на секунди очікування.
     blockMainThread(100); 
 
     // Імітація можливості помилки під навантаженням
-    // Наприклад, кожний 20-й запит "падає"
     if (Math.random() < 0.05) { // 5% шанс помилки
         console.log("Simulating server error...");
         return res.status(500).json({ error: "Internal Server Error. Please try again later." });
     }
 
-    res.json(productsData);
+    // Повертаємо копію даних з розв'язаними URL для клієнта
+    const payload = productsData.map(p => ({
+        ...p,
+        imageUrl: resolveImageUrl(p)
+    }));
+
+    res.json(payload);
 });
 
 app.listen(PORT, () => {
