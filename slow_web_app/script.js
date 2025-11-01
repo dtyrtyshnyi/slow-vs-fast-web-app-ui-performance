@@ -1,7 +1,9 @@
 // URL "поганого" API на AWS EC2 або локально
-//const API_HOST = 'localhost:4000';
-const API_HOST = '192.168.0.103:4000';
-const API_URL = `http://${API_HOST}/api/products`;
+//const API_HOST = 'http://localhost:4000';
+//const API_HOST = 'http://192.168.0.103:4000';
+//const API_HOST = 'http://my-lb-999493181.eu-central-1.elb.amazonaws.com';
+const API_HOST = 'https://d8eaabtb7vxfq.cloudfront.net';
+const API_URL = `${API_HOST}/api/products`;
 
 // ПРОБЛЕМА UI 3: "Важкий" синхронний JS на клієнті
 function blockClientThread(duration) {
