@@ -6,9 +6,31 @@ const PORT = process.env.PORT || 4001;
 
 app.use(cors());
 
+// Конфіг для переключення локальних та CDN-URL зображень.
+// Керувати через змінні оточення:
+//   USE_CDN=true CDN_BASE_URL=https://d361b03n3b4xcx.cloudfront.net node server.js
+const USE_CDN = (process.env.USE_CDN === 'true'); // default: false
+const CDN_BASE_URL = (process.env.CDN_BASE_URL || '').replace(/\/$/, ''); // без кінцевого '/'
+
 // ФІКС 1: Повністю видалено функцію blockMainThread(100).
 // Наш "хороший" API більше не блокує event loop.
 // Він відповідатиме миттєво.
+
+// Допоміжна функція для формування фінального imageUrl
+function resolveImageUrl(product) {
+    // Якщо увімкнено CDN і в товарі є явно вказане cdnImageUrl — використовуємо його
+    if (USE_CDN && product.cdnImageUrl) {
+        return product.cdnImageUrl;
+    }
+
+    // Якщо увімкнено CDN та заданий CDN_BASE_URL — будуємо URL на основі локального шляху
+    if (USE_CDN && CDN_BASE_URL) {
+        return `${CDN_BASE_URL}/${product.imageUrl.replace(/^\/+/, '')}`;
+    }
+
+    // Інакше повертаємо локальний шлях (як було раніше)
+    return product.imageUrl;
+}
 
 // "База даних" наших товарів
 const productsData = [
@@ -77,10 +99,15 @@ app.get('/api/products', (req, res) => {
     // ФІКС 1 (продовження): Ми прибрали blockMainThread(100)
 
     // ФІКС 3: Ми прибрали 5% шанс помилки.
-    // Наш "хороший" API стабільний і не повертає 500 помилок.
+    // Наш "швидкий" API стабільний і не повертає 500 помилок.
     // if (Math.random() < 0.05) { ... } -- ВИДАЛЕНО
 
-    res.json(productsData);
+    const payload = productsData.map(p => ({
+        ...p,
+        imageUrl: resolveImageUrl(p)
+    }));
+
+    res.json(payload);
 });
 
 app.listen(PORT, () => {
